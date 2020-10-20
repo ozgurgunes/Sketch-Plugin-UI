@@ -3,8 +3,8 @@
  * the running command name.
  *
  * @param {string} text The message to show.
- * @param {error|success} [status] Puts and emoji before the command name
- *                                 (⚠️|✅).
+ * @param {'error' | 'success'} [status] Puts an emoji before the command name
+ *     (⚠️ or ✅).
  */
 export function message(text, status) {
   let emoji = ''
@@ -16,14 +16,14 @@ export function message(text, status) {
       emoji = '✅  '
       break
   }
-  context.document.showMessage(emoji + context.command.name() + ':  ' + text)
+  context.document.showMessage(emoji + context.command.name() + ': ' + text)
 }
 
 /**
  * Shows a message with error status.
  *
  * @param {string} text The message to show.
- * @return {message} Message with `error` status.
+ * @returns {message} Message with `error` status.
  */
 export function error(text) {
   return message(text, 'error')
@@ -33,7 +33,7 @@ export function error(text) {
  * Shows a message with success status.
  *
  * @param {string} text The message to show.
- * @return {message} Message with `success` status.
+ * @returns {message} Message with `success` status.
  */
 export function success(text) {
   return message(text, 'success')
@@ -44,11 +44,12 @@ export function success(text) {
  *
  * @param {string} info The message to show in dialog.
  * @param {object} [accessory] An AppKit view or control to place in dialog for
- *                             user inputs.
- * @param {Array.<string>} [buttons=['OK']] Buttons to display in dialog for
- *                                          user actions.
- * @param {string} [message=context.command.name()] Title of dialog message.
- * @return {NSAlert} Modal dialog window.
+ *     user inputs.
+ * @param {string[]} [buttons] Buttons to display in dialog for user actions.
+ *     Default is `['OK']`
+ * @param {string} [message] Title of dialog message. Default is
+ *     `context.command.name()`
+ * @returns {NSAlert} Modal dialog window.
  */
 export function dialog(info, accessory, buttons, message) {
   buttons = buttons || ['OK']
@@ -73,19 +74,19 @@ export function dialog(info, accessory, buttons, message) {
  * Returns a text input accessory.
  *
  * @param {string} [initial] Default input text.
- * @return {NSTextField} Text input with initial value.
+ * @returns {NSTextField} Text input with initial value.
  */
-export function textField(initial) {
+export function textField(initial='') {
   let accessory = NSTextField.alloc().initWithFrame(NSMakeRect(0, 0, 240, 25))
-  accessory.setStringValue(initial || '')
+  accessory.setStringValue(initial)
   return accessory
 }
 
 /**
  * Returns an editable, autocomplete combo box accessory.
  *
- * @param {Array.<string>} items Options to be listed in combo box.
- * @return {NSComboBox} Combo box with options.
+ * @param {string[]} items Options to be listed in combo box.
+ * @returns {NSComboBox} Combo box with options.
  */
 export function comboBox(items) {
   let accessory = NSComboBox.alloc().initWithFrame(NSMakeRect(0, 0, 240, 25))
@@ -98,8 +99,8 @@ export function comboBox(items) {
 /**
  * Returns a pop up button accessory.
  *
- * @param {Array.<string>} items Options to be listed in pop up button.
- * @return {NSPopUpButton} Pop up button with options.
+ * @param {string[]} items Options to be listed in pop up button.
+ * @returns {NSPopUpButton} Pop up button with options.
  */
 export function popUpButton(items) {
   let accessory = NSPopUpButton.alloc().initWithFrame(NSMakeRect(0, 0, 240, 25))
@@ -108,29 +109,24 @@ export function popUpButton(items) {
 }
 
 /**
- * Returns a slider accessory.
+ * Returns a slider accessory with tick marks for given range.
  *
- * @param {Object} [options] Properties of the slider.
- * @param {number} [options.initialValue=5] Default selected value of slider.
- * @param {number} [options.minValue=1] Minimum selectable value of slider.
- * @param {number} [options.maxValue=10] Maximum selectable value of slider.
- * @return {NSSlider} Slider with given range.
+ * @property {number} [options.minValue] Minimum selectable value of slider.
+ *     Default is `1`
+ * @property {number} [options.maxValue] Maximum selectable value of slider.
+ *     Default is `10`
+ * @property {number} [options.initialValue] Initial selected value of slider.
+ *     Default is `1`
+ * @param {Object} options Properties of the slider.
+ * @returns {NSSlider} Slider with given range.
  */
-export function slider(options) {
+export function slider({ minValue = 1, maxValue = 10, initialValue = 1 }) {
   let accessory = NSSlider.alloc().initWithFrame(NSMakeRect(0, 0, 240, 25))
-  accessory.setFloatValue(Number(options.initialValue || 5))
-  accessory.setMinValue(options.minValue || 1)
-  accessory.setMaxValue(options.maxValue || 10)
+  accessory.setMinValue(minValue)
+  accessory.setMaxValue(maxValue)
+  accessory.setValue(initialValue)
   accessory.setAllowsTickMarkValuesOnly(true)
-  accessory.setNumberOfTickMarks(
-    parseInt(
-      1 +
-        ((typeof options.maxValue !== 'undefined' ? options.maxValue : 1) -
-          (typeof options.minValue !== 'undefined' ? options.minValue : 0)) /
-          options.increment,
-      10
-    )
-  )
+  accessory.setNumberOfTickMarks(1 + maxValue - minValue)
   return accessory
 }
 
@@ -138,7 +134,7 @@ export function slider(options) {
  * Returns a vertically scrollable accessory with given view.
  *
  * @param {object} view Accessory to be placed in scroll view.
- * @return {NSView} View with scrollable content.
+ * @returns {NSView} View with scrollable content.
  */
 export function scrollView(view) {
   let accessory = NSView.alloc().initWithFrame(NSMakeRect(0, 0, 300, 120))
@@ -154,9 +150,9 @@ export function scrollView(view) {
 
 /**
  * A dictionary of required components to get user selection.
- * 
+ *
  * @typedef {Object} CheckboxList
- * @property {Array.<NSButton>} options List of checkboxes.
+ * @property {NSButton[]} options List of checkboxes.
  * @property {NSView} view View of options.
  * @property {function} getSelection Returns indexes of selected options.
  */
@@ -164,8 +160,8 @@ export function scrollView(view) {
 /**
  * Returns a checkbox list accessory of options.
  *
- * @param {Array.<string>} items Options to be listed with checkboxes.
- * @return {CheckboxList} List of options.
+ * @param {string[]} items Options to be listed with checkboxes.
+ * @returns {CheckboxList} List of options.
  */
 export function optionList(items) {
   let listView = NSView.alloc().initWithFrame(
@@ -200,8 +196,8 @@ export function optionList(items) {
 /**
  * Returns a text list accesory.
  *
- * @param {Array.<string>} items Options to be listed in scroll view.
- * @return {NSView} List of items.
+ * @param {string[]} items Options to be listed in scroll view.
+ * @returns {NSView} List of items.
  */
 export function textList(items) {
   let listView = NSView.alloc().initWithFrame(

@@ -29,6 +29,6 @@
     "eslint-plugin-prettier": "^3.1.2",
     "jsdoc-to-markdown": "^6.0.1",
     "prettier": "^1.19.1",
-    "prettier-plugin-jsdoc": "git+https://gitlab.com/gumen/prettier-plugin-jsdoc.git"
+    "prettier-plugin-jsdoc": "^0.2.0"
   }
 }

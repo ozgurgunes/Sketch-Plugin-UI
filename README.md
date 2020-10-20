@@ -1,6 +1,6 @@
 # Sketch Plugin UI
 
-Simple UI functions for Sketch plugins. Provides preset status messages and dialog windows with rich accessories and scroll views.
+Simple UI functions for Sketch plugins. Provides preset status messages and dialog windows with accessories and scroll views.
 
 ## Installation
 
@@ -123,7 +123,7 @@ if (response === 1000) {
 * [textField([initial])](#textField) ⇒ <code>NSTextField</code>
 * [comboBox(items)](#comboBox) ⇒ <code>NSComboBox</code>
 * [popUpButton(items)](#popUpButton) ⇒ <code>NSPopUpButton</code>
-* [slider([options])](#slider) ⇒ <code>NSSlider</code>
+* [slider(options)](#slider) ⇒ <code>NSSlider</code>
 * [scrollView(view)](#scrollView) ⇒ <code>NSView</code>
 * [optionList(items)](#optionList) ⇒ [<code>CheckboxList</code>](#CheckboxList)
 * [textList(items)](#textList) ⇒ <code>NSView</code>
@@ -143,7 +143,7 @@ the running command name.
 | Param | Type | Description |
 | --- | --- | --- |
 | text | <code>string</code> | The message to show. |
-| [status] | [<code>error</code>](#error) \| [<code>success</code>](#success) | Puts and emoji before the command name                                 (⚠️|✅). |
+| [status] | <code>&#x27;error&#x27;</code> \| <code>&#x27;success&#x27;</code> | Puts an emoji before the command name     (⚠️ or ✅). |
 
 <a name="error"></a>
 
@@ -177,12 +177,12 @@ Shows a customizable modal dialog.
 **Kind**: global function  
 **Returns**: <code>NSAlert</code> - Modal dialog window.  
 
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| info | <code>string</code> |  | The message to show in dialog. |
-| [accessory] | <code>object</code> |  | An AppKit view or control to place in dialog for                             user inputs. |
-| [buttons] | <code>Array.&lt;string&gt;</code> | <code>[&#x27;OK&#x27;]</code> | Buttons to display in dialog for                                          user actions. |
-| [message] | <code>string</code> | <code>&quot;context.command.name()&quot;</code> | Title of dialog message. |
+| Param | Type | Description |
+| --- | --- | --- |
+| info | <code>string</code> | The message to show in dialog. |
+| [accessory] | <code>object</code> | An AppKit view or control to place in dialog for     user inputs. |
+| [buttons] | <code>Array.&lt;string&gt;</code> | Buttons to display in dialog for user actions.     Default is `['OK']` |
+| [message] | <code>string</code> | Title of dialog message. Default is     `context.command.name()` |
 
 <a name="textField"></a>
 
@@ -222,18 +222,23 @@ Returns a pop up button accessory.
 
 <a name="slider"></a>
 
-## slider([options]) ⇒ <code>NSSlider</code>
-Returns a slider accessory.
+## slider(options) ⇒ <code>NSSlider</code>
+Returns a slider accessory with tick marks for given range.
 
 **Kind**: global function  
 **Returns**: <code>NSSlider</code> - Slider with given range.  
 
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| [options] | <code>Object</code> |  | Properties of the slider. |
-| [options.initialValue] | <code>number</code> | <code>5</code> | Default selected value of slider. |
-| [options.minValue] | <code>number</code> | <code>1</code> | Minimum selectable value of slider. |
-| [options.maxValue] | <code>number</code> | <code>10</code> | Maximum selectable value of slider. |
+| Param | Type | Description |
+| --- | --- | --- |
+| options | <code>Object</code> | Properties of the slider. |
+
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| [options.minValue] | <code>number</code> | Minimum selectable value of slider.     Default is `1` |
+| [options.maxValue] | <code>number</code> | Maximum selectable value of slider.     Default is `10` |
+| [options.initialValue] | <code>number</code> | Initial selected value of slider.     Default is `1` |
 
 <a name="scrollView"></a>
 
