@@ -3,13 +3,14 @@
  * the running command name.
  *
  * @param {string} text The message to show.
- * @param {'error' | 'success'} [status] Puts an emoji before the command name
+ * @param {'fail' | 'success'} [status] Puts an emoji before the command name
  *     (⚠️ or ✅).
+ * @returns {string} The `text` parameter passed to the function.
  */
 export function message(text, status) {
   let emoji = ''
   switch (status) {
-    case 'error':
+    case 'fail':
       emoji = '⚠️  '
       break
     case 'success':
@@ -17,16 +18,17 @@ export function message(text, status) {
       break
   }
   context.document.showMessage(emoji + context.command.name() + ': ' + text)
+  return text
 }
 
 /**
- * Shows a message with error status.
+ * Shows a message with fail status.
  *
  * @param {string} text The message to show.
- * @returns {message} Message with `error` status.
+ * @returns {message} Message with `fail` status.
  */
-export function error(text) {
-  return message(text, 'error')
+export function fail(text) {
+  return message(text, 'fail')
 }
 
 /**
@@ -76,7 +78,7 @@ export function dialog(info, accessory, buttons, message) {
  * @param {string} [initial] Default input text.
  * @returns {NSTextField} Text input with initial value.
  */
-export function textField(initial='') {
+export function textField(initial = '') {
   let accessory = NSTextField.alloc().initWithFrame(NSMakeRect(0, 0, 240, 25))
   accessory.setStringValue(initial)
   return accessory

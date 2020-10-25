@@ -34,9 +34,9 @@ success('It works!')
 ⚠️   My Plugin Command:  Something gone bad!
 
 ```javascript
-import { error } from '@ozgurgunes/sketch-plugin-ui'
+import { fail } from '@ozgurgunes/sketch-plugin-ui'
 
-error('Something gone bad!')
+fail('Something gone bad!')
 ```
 
 #### Show a Dialog
@@ -54,7 +54,7 @@ dialog('Click OK to close this dialog.')
 An autocomplete combo box, which user can pick an option or type new one.
 
 ```javascript
-import { comboBox, dialog, error, success } from '@ozgurgunes/sketch-plugin-ui'
+import { comboBox, dialog, fail, success } from '@ozgurgunes/sketch-plugin-ui'
 
 var buttons = ['OK', 'Cancel']
 var info = 'Please type or pick something in the combo box.'
@@ -65,7 +65,7 @@ var result = accessory.stringValue()
 if (response === 1000) {
   if (!result.length() > 0) {
     // User clicked "OK" without entering anything.
-    error("You didn't enter anything.")
+    fail("You didn't enter anything.")
   } else {
     success('You entered "' + result + '"')
   }
@@ -81,7 +81,7 @@ import {
   optionList,
   scrollView,
   dialog,
-  error,
+  fail,
   success
 } from '@ozgurgunes/sketch-plugin-ui'
 
@@ -107,7 +107,7 @@ if (response === 1002) {
 if (response === 1000) {
   if (list.getSelection().length == 0) {
     // User clicked to "Select" button, without selecting any option.
-    error('Nothing selected.')
+    fail('Nothing selected.')
   } else {
     success(list.getSelection().length + ' options selected.')
   }
@@ -117,7 +117,7 @@ if (response === 1000) {
 ## Functions
 
 * [message(text, [status])](#message)
-* [error(text)](#error) ⇒ [<code>message</code>](#message)
+* [fail(text)](#fail) ⇒ [<code>message</code>](#message)
 * [success(text)](#success) ⇒ [<code>message</code>](#message)
 * [dialog(info, [accessory], [buttons], [message])](#dialog) ⇒ <code>NSAlert</code>
 * [textField([initial])](#textField) ⇒ <code>NSTextField</code>
@@ -139,19 +139,20 @@ Shows a temporary message at the bottom of the document. Message starts with
 the running command name.
 
 **Kind**: global function  
+**Returns**: <code>string</code> - The `text` parameter passed to the function.
 
 | Param | Type | Description |
 | --- | --- | --- |
 | text | <code>string</code> | The message to show. |
-| [status] | <code>&#x27;error&#x27;</code> \| <code>&#x27;success&#x27;</code> | Puts an emoji before the command name     (⚠️ or ✅). |
+| [status] | <code>&#x27;fail&#x27;</code> \| <code>&#x27;success&#x27;</code> | Puts an emoji before the command name     (⚠️ or ✅). |
 
-<a name="error"></a>
+<a name="fail"></a>
 
-## error(text) ⇒ [<code>message</code>](#message)
-Shows a message with error status.
+## fail(text) ⇒ [<code>message</code>](#message)
+Shows a message with fail status.
 
 **Kind**: global function  
-**Returns**: [<code>message</code>](#message) - Message with `error` status.  
+**Returns**: [<code>message</code>](#message) - Message with `fail` status.  
 
 | Param | Type | Description |
 | --- | --- | --- |
