@@ -3,46 +3,49 @@
  * the running command name.
  *
  * @param {string} text The message to show.
- * @param {'fail' | 'success'} [status] Puts an emoji before the command name
+ * @param {'error' | 'success'} [status] Puts an emoji before the command name
  *     (⚠️ or ✅).
- * @returns {string} The `text` parameter passed to the function.
+ * @param {Document} [document] The document which the message will be shown in.
+ *     Default is `context.document`
  */
-export function message(text, status) {
+export function showMessage(text, status, document = context.document) {
   let emoji = ''
   switch (status) {
-    case 'fail':
+    case 'error':
       emoji = '⚠️  '
       break
     case 'success':
       emoji = '✅  '
       break
   }
-  context.document.showMessage(emoji + context.command.name() + ': ' + text)
-  return text
+  document.showMessage(emoji + context.command.name() + ': ' + text)
 }
 
 /**
- * Shows a message with fail status.
+ * Shows a message with error status.
  *
  * @param {string} text The message to show.
- * @returns {message} Message with `fail` status.
+ * @param {Document} [document] The document which the message will be shown in.
+ *     Default is `context.document`
  */
-export function fail(text) {
-  return message(text, 'fail')
+export function errorMessage(text, document = context.document) {
+  showMessage(text, 'error', document)
 }
 
 /**
  * Shows a message with success status.
  *
  * @param {string} text The message to show.
- * @returns {message} Message with `success` status.
+ * @param {Document} [document] The document which the message will be shown in.
+ *     Default is `context.document`
  */
-export function success(text) {
-  return message(text, 'success')
+export function successMessage(text, document = context.document) {
+  showMessage(text, 'success', document)
 }
 
 /**
- * Shows a customizable modal dialog.
+ * An alert with a combination of message, information text, buttons, and
+ * accessories.
  *
  * @param {string} info The message to show in dialog.
  * @param {object} [accessory] An AppKit view or control to place in dialog for
@@ -51,35 +54,101 @@ export function success(text) {
  *     Default is `['OK']`
  * @param {string} [message] Title of dialog message. Default is
  *     `context.command.name()`
+ * @param {number} [type] Indicates the alert’s severity level. Default is `0`
  * @returns {NSAlert} Modal dialog window.
  */
-export function dialog(info, accessory, buttons, message) {
+export function alert(info, buttons, accessory, message, type = 0) {
   buttons = buttons || ['OK']
   message = message || context.command.name()
   var alert = NSAlert.alloc().init()
   alert.setMessageText(message)
   alert.setInformativeText(info)
+  alert.alertStyle = type
   buttons.map(button => alert.addButtonWithTitle(button))
   if (context.plugin.alertIcon()) {
     alert.icon = context.plugin.alertIcon()
   }
   if (accessory) {
     alert.setAccessoryView(accessory)
-    if (!accessory.isMemberOfClass(NSTextView)) {
-      alert.window().setInitialFirstResponder(accessory)
-    }
+    alert.window().setInitialFirstResponder(accessory)
   }
+  return alert
+}
+
+/**
+ * Runs the alert as an app-modal dialog.
+ *
+ * @param {NSAlert} alert A preset alert to run.
+ * @returns {number} The constant that identifies the button clicked.
+ */
+export function showDialog(alert) {
   return alert.runModal()
+}
+
+/**
+ * Runs the alert modally as a sheet attached to the specified window.
+ *
+ * @param {NSAlert} alert A preset alert to run.
+ * @param {Document} [document] The document which to display the sheet on
+ *     window. Default is `context.document`
+ * @returns {number} The constant that identifies the button clicked.
+ */
+export function showSheet(alert, document = context.document) {
+  let window = (document.sketchObject || document).documentWindow()
+  alert.beginSheetModalForWindow_completionHandler(
+    window,
+    __mocha__.createBlock_function('v16@?0q8', function onCompletion(
+      _returnCode
+    ) {
+      NSApp.stopModalWithCode(_returnCode)
+    })
+  )
+  let response = NSApp.runModalForWindow(window)
+  NSApp.endSheet(alert)
+  return response
+}
+
+/**
+ * Simple text label for input fields.
+ *
+ * @param {string} text The label text to display.
+ * @param {NSRect} [frame] The rectangle of the text field, specified in
+ *     points in the coordinate space of the enclosing view. Default is
+ *     `NSMakeRect(0, 0, 240, 25)`
+ * @param {number} [size] The font size of the text. Default is
+ *     `NSFont.systemFontSize()`
+ * @param {boolean} [bold] Specifies whether display the text bold. Default is
+ *     `false`
+ * @returns {NSTextField} Uneditable text field to display.
+ */
+export function inputLabel(text, frame, size, bold = false) {
+  frame = frame || NSMakeRect(0, 0, 240, 18)
+  size = size || NSFont.systemFontSize()
+  let label = NSTextField.alloc().initWithFrame(frame)
+  label.setFont(
+    bold ? NSFont.boldSystemFontOfSize(size) : NSFont.systemFontOfSize(size)
+  )
+  label.setEditable(false)
+  label.setSelectable(false)
+  label.setStringValue(text)
+  label.setBezeled(false)
+  label.setDrawsBackground(false)
+
+  return label
 }
 
 /**
  * Returns a text input accessory.
  *
  * @param {string} [initial] Default input text.
+ * @param {NSRect} [frame] The rectangle of the control, specified in
+ *     points in the coordinate space of the enclosing view. Default is
+ *     `NSMakeRect(0, 0, 240, 25)`
  * @returns {NSTextField} Text input with initial value.
  */
-export function textField(initial = '') {
-  let accessory = NSTextField.alloc().initWithFrame(NSMakeRect(0, 0, 240, 25))
+export function textField(initial = '', frame) {
+  frame = frame || NSMakeRect(0, 0, 240, 18)
+  let accessory = NSTextField.alloc().initWithFrame(frame)
   accessory.setStringValue(initial)
   return accessory
 }
@@ -88,10 +157,14 @@ export function textField(initial = '') {
  * Returns an editable, autocomplete combo box accessory.
  *
  * @param {string[]} items Options to be listed in combo box.
+ * @param {NSRect} [frame] The rectangle of the control, specified in
+ *     points in the coordinate space of the enclosing view. Default is
+ *     `NSMakeRect(0, 0, 240, 25)`
  * @returns {NSComboBox} Combo box with options.
  */
-export function comboBox(items) {
-  let accessory = NSComboBox.alloc().initWithFrame(NSMakeRect(0, 0, 240, 25))
+export function comboBox(items = [], frame) {
+  frame = frame || NSMakeRect(0, 0, 240, 25)
+  let accessory = NSComboBox.alloc().initWithFrame(frame)
   accessory.addItemsWithObjectValues(items)
   accessory.setEditable(true)
   accessory.setCompletes(true)
@@ -102,10 +175,14 @@ export function comboBox(items) {
  * Returns a pop up button accessory.
  *
  * @param {string[]} items Options to be listed in pop up button.
+ * @param {NSRect} [frame] The rectangle of the control, specified in
+ *     points in the coordinate space of the enclosing view. Default is
+ *     `NSMakeRect(0, 0, 240, 25)`
  * @returns {NSPopUpButton} Pop up button with options.
  */
-export function popUpButton(items) {
-  let accessory = NSPopUpButton.alloc().initWithFrame(NSMakeRect(0, 0, 240, 25))
+export function popUpButton(items = [], frame) {
+  frame = frame || NSMakeRect(0, 0, 240, 25)
+  let accessory = NSPopUpButton.alloc().initWithFrame(frame)
   accessory.addItemsWithTitles(items)
   return accessory
 }
@@ -120,10 +197,17 @@ export function popUpButton(items) {
  * @property {number} [options.initialValue] Initial selected value of slider.
  *     Default is `1`
  * @param {Object} options Properties of the slider.
+ * @param {NSRect} [frame] The rectangle of the control, specified in
+ *     points in the coordinate space of the enclosing view. Default is
+ *     `NSMakeRect(0, 0, 240, 25)`
  * @returns {NSSlider} Slider with given range.
  */
-export function slider({ minValue = 1, maxValue = 10, initialValue = 1 }) {
-  let accessory = NSSlider.alloc().initWithFrame(NSMakeRect(0, 0, 240, 25))
+export function slider(
+  { minValue = 1, maxValue = 10, initialValue = 1 },
+  frame
+) {
+  frame = frame || NSMakeRect(0, 0, 240, 25)
+  let accessory = NSSlider.alloc().initWithFrame(frame)
   accessory.setMinValue(minValue)
   accessory.setMaxValue(maxValue)
   accessory.setValue(initialValue)
@@ -135,19 +219,28 @@ export function slider({ minValue = 1, maxValue = 10, initialValue = 1 }) {
 /**
  * Returns a vertically scrollable accessory with given view.
  *
- * @param {object} view Accessory to be placed in scroll view.
+ * @param {NSView} documentView The view the scroll view scrolls within its
+ *     content view.
+ * @param {NSRect} [frame] The rectangle of the scroll view. Default is
+ *     `NSMakeRect(0, 0, 320, 120)`
+ * @param {boolean} [horizontal] A Boolean that indicates whether the scroll
+ *     view has a horizontal scroller. Default is `false`
+ * @param {boolean} [vertical] A Boolean that indicates whether the scroll view
+ *     has a vertical scroller. Default is `true`
  * @returns {NSView} View with scrollable content.
  */
-export function scrollView(view) {
-  let accessory = NSView.alloc().initWithFrame(NSMakeRect(0, 0, 300, 120))
-  let scrollView = NSScrollView.alloc().initWithFrame(
-    NSMakeRect(0, 0, 300, 120)
-  )
-  scrollView.setHasVerticalScroller(true)
-  scrollView.setHasHorizontalScroller(false)
-  scrollView.setDocumentView(view)
-  accessory.addSubview(scrollView)
-  return accessory
+export function scrollView(
+  documentView,
+  frame,
+  horizontal = false,
+  vertical = true
+) {
+  frame = frame || NSMakeRect(0, 0, 320, 120)
+  let scrollView = NSScrollView.alloc().initWithFrame(frame)
+  scrollView.setHasVerticalScroller(vertical)
+  scrollView.setHasHorizontalScroller(horizontal)
+  scrollView.setDocumentView(documentView)
+  return scrollView
 }
 
 /**
@@ -163,16 +256,17 @@ export function scrollView(view) {
  * Returns a checkbox list accessory of options.
  *
  * @param {string[]} items Options to be listed with checkboxes.
+ * @param {number} [width] Width of the options. Default is `320`
  * @returns {CheckboxList} List of options.
  */
-export function optionList(items) {
+export function optionList(items, width = 320) {
   let listView = NSView.alloc().initWithFrame(
-    NSMakeRect(0, 0, 300, items.length * 24 + 10)
+    NSMakeRect(0, 0, width, items.length * 25 + 10)
   )
   let options = []
   items.map((item, i) => {
     options[i] = NSButton.alloc().initWithFrame(
-      NSMakeRect(5, 5 + i * 24, 290, 20)
+      NSMakeRect(5, 5 + i * 25, width - 10, 25)
     )
     options[i].setButtonType(NSSwitchButton)
     options[i].setTitle(item)
@@ -199,17 +293,18 @@ export function optionList(items) {
  * Returns a text list accesory.
  *
  * @param {string[]} items Options to be listed in scroll view.
+ * @param {number} [width] Width of the list items. Default is `320`
  * @returns {NSView} List of items.
  */
-export function textList(items) {
+export function textList(items, width = 320) {
   let listView = NSView.alloc().initWithFrame(
-    NSMakeRect(0, 0, 300, items.length * 24 + 10)
+    NSMakeRect(0, 0, width, items.length * 25 + 10)
   )
-  let font = NSFont.systemFontOfSize(NSFont.smallSystemFontSize())
+  let font = NSFont.systemFontOfSize(NSFont.systemFontSize())
   let errors = []
   items.map((item, i) => {
     errors[i] = NSTextView.alloc().initWithFrame(
-      NSMakeRect(5, 10 + i * 24, 290, 20)
+      NSMakeRect(5, 10 + i * 25, width - 10, 10)
     )
     errors[i].insertText(item)
     errors[i].setFont(font)

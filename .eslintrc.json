@@ -10,7 +10,8 @@
     "plugins": ["prettier"],
     "globals": {
         "context": "readonly",
-        "NSSwitchButton": "readonly"
+        "NSSwitchButton": "readonly",
+        "__mocha__": "readonly"
     },
     "parserOptions": {
         "ecmaVersion": 2018,

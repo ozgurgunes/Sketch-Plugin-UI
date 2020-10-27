@@ -15,18 +15,18 @@ npm i @ozgurgunes/sketch-plugin-ui
 My Plugin Command:  Hello Wold!
 
 ```javascript
-import { message } from '@ozgurgunes/sketch-plugin-ui'
+import { showMessage } from '@ozgurgunes/sketch-plugin-ui'
 
-message('Hello Wold!')
+showMessage('Hello Wold!')
 ```
 #### Show a Message with Check Mark Button Emoji
 
 ✅   My Plugin Command:  It works!
 
 ```javascript
-import { success } from '@ozgurgunes/sketch-plugin-ui'
+import { successMessage } from '@ozgurgunes/sketch-plugin-ui'
 
-success('It works!')
+successMessage('It works!')
 ```
 
 #### Show a Message with Warning Emoji
@@ -34,9 +34,9 @@ success('It works!')
 ⚠️   My Plugin Command:  Something gone bad!
 
 ```javascript
-import { fail } from '@ozgurgunes/sketch-plugin-ui'
+import { errorMessage } from '@ozgurgunes/sketch-plugin-ui'
 
-fail('Something gone bad!')
+errorMessage('Something gone bad!')
 ```
 
 #### Show a Dialog
@@ -44,9 +44,9 @@ fail('Something gone bad!')
  Plugin icon, command name as title and an "OK" button.
 
 ```javascript
-import { dialog } from '@ozgurgunes/sketch-plugin-ui'
+import { alert } from '@ozgurgunes/sketch-plugin-ui'
 
-dialog('Click OK to close this dialog.')
+alert('Click OK to close this dialog.').runModal()
 ```
 
 #### Get User Input
@@ -54,20 +54,25 @@ dialog('Click OK to close this dialog.')
 An autocomplete combo box, which user can pick an option or type new one.
 
 ```javascript
-import { comboBox, dialog, fail, success } from '@ozgurgunes/sketch-plugin-ui'
+import {
+  comboBox,
+  alert,
+  errorMessage,
+  successMessage,
+} from "@ozgurgunes/sketch-plugin-ui"
 
-var buttons = ['OK', 'Cancel']
-var info = 'Please type or pick something in the combo box.'
-var options = ['An option', 'Another option']
+var buttons = ["OK", "Cancel"]
+var info = "Please type or pick something in the combo box."
+var options = ["An option", "Another option"]
 var accessory = comboBox(options)
-var response = dialog(info, accessory, buttons)
+var response = alert(info, buttons, accessory).runModal()
 var result = accessory.stringValue()
 if (response === 1000) {
   if (!result.length() > 0) {
     // User clicked "OK" without entering anything.
-    fail("You didn't enter anything.")
+    errorMessage("You didn't enter anything.")
   } else {
-    success('You entered "' + result + '"')
+    successMessage('You entered "' + result + '"')
   }
 }
 ```
@@ -80,9 +85,9 @@ A scrollable checkbox list with an additional `Select All` button.
 import {
   optionList,
   scrollView,
-  dialog,
-  fail,
-  success
+  alert,
+  errorMessage,
+  successMessage
 } from '@ozgurgunes/sketch-plugin-ui'
 
 var buttons = ['Select', 'Cancel', 'Select All']
@@ -90,90 +95,95 @@ var info = 'Please select options.'
 var options = ['An option', 'Another option']
 var list = optionList(options)
 var accessory = scrollView(list.view)
-var response = dialog(info, accessory, buttons)
+var response = alert(info, buttons, accessory).runModal()
 if (response === 1002) {
   // User clicked to "Select All".
   // Get a confirmation before selecting all.
   var message = 'Are you sure?'
   info = 'All options will be deleted!'
   buttons = ['Select All', 'Cancel']
-  var confirmed = dialog(info, null, buttons, message)
+  var confirmed = alert(info, buttons, null, message).runModal()
   if (confirmed === 1000) {
     // User is sure to select all.
     list.options.map(option => option.setState(true))
-    success('All ' + options.length + ' option selected.')
+    successMessage('All ' + options.length + ' option selected.')
   }
 }
 if (response === 1000) {
   if (list.getSelection().length == 0) {
     // User clicked to "Select" button, without selecting any option.
-    fail('Nothing selected.')
+    errorMessage('Nothing selected.')
   } else {
-    success(list.getSelection().length + ' options selected.')
+    successMessage(list.getSelection().length + ' options selected.')
   }
 }
 ```
 
+
 ## Functions
 
-* [message(text, [status])](#message)
-* [fail(text)](#fail) ⇒ [<code>message</code>](#message)
-* [success(text)](#success) ⇒ [<code>message</code>](#message)
-* [dialog(info, [accessory], [buttons], [message])](#dialog) ⇒ <code>NSAlert</code>
-* [textField([initial])](#textField) ⇒ <code>NSTextField</code>
-* [comboBox(items)](#comboBox) ⇒ <code>NSComboBox</code>
-* [popUpButton(items)](#popUpButton) ⇒ <code>NSPopUpButton</code>
-* [slider(options)](#slider) ⇒ <code>NSSlider</code>
-* [scrollView(view)](#scrollView) ⇒ <code>NSView</code>
-* [optionList(items)](#optionList) ⇒ [<code>CheckboxList</code>](#CheckboxList)
-* [textList(items)](#textList) ⇒ <code>NSView</code>
+* [showMessage(text, [status], [document])](#showMessage)
+* [errorMessage(text, [document])](#errorMessage)
+* [successMessage(text, [document])](#successMessage)
+* [alert(info, [accessory], [buttons], [message], [type])](#alert) ⇒ <code>NSAlert</code>
+* [showDialog(alert)](#showDialog) ⇒ <code>number</code>
+* [showSheet(alert, [document])](#showSheet) ⇒ <code>number</code>
+* [inputLabel(text, [frame], [size], [bold])](#inputLabel) ⇒ <code>NSTextField</code>
+* [textField([initial], [frame])](#textField) ⇒ <code>NSTextField</code>
+* [comboBox(items, [frame])](#comboBox) ⇒ <code>NSComboBox</code>
+* [popUpButton(items, [frame])](#popUpButton) ⇒ <code>NSPopUpButton</code>
+* [slider(options, [frame])](#slider) ⇒ <code>NSSlider</code>
+* [scrollView(documentView, [frame], [horizontal], [vertical])](#scrollView) ⇒ <code>NSView</code>
+* [optionList(items, [width])](#optionList) ⇒ [<code>CheckboxList</code>](#CheckboxList)
+* [textList(items, [width])](#textList) ⇒ <code>NSView</code>
 
 ## Typedefs
 
 * [CheckboxList](#CheckboxList) : <code>Object</code>
 
-<a name="message"></a>
+<a name="showMessage"></a>
 
-## message(text, [status])
+## showMessage(text, [status], [document])
 Shows a temporary message at the bottom of the document. Message starts with
 the running command name.
 
 **Kind**: global function  
-**Returns**: <code>string</code> - The `text` parameter passed to the function.
 
 | Param | Type | Description |
 | --- | --- | --- |
 | text | <code>string</code> | The message to show. |
-| [status] | <code>&#x27;fail&#x27;</code> \| <code>&#x27;success&#x27;</code> | Puts an emoji before the command name     (⚠️ or ✅). |
+| [status] | <code>&#x27;error&#x27;</code> \| <code>&#x27;success&#x27;</code> | Puts an emoji before the command name (⚠️ or ✅). |
+| [document] | <code>Document</code> | The document which the message will be shown in. Default is `context.document` |
 
-<a name="fail"></a>
+<a name="errorMessage"></a>
 
-## fail(text) ⇒ [<code>message</code>](#message)
-Shows a message with fail status.
+## errorMessage(text, [document])
+Shows a message with error status.
 
 **Kind**: global function  
-**Returns**: [<code>message</code>](#message) - Message with `fail` status.  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | text | <code>string</code> | The message to show. |
+| [document] | <code>Document</code> | The document which the message will be shown in. Default is `context.document` |
 
-<a name="success"></a>
+<a name="successMessage"></a>
 
-## success(text) ⇒ [<code>message</code>](#message)
+## successMessage(text, [document])
 Shows a message with success status.
 
 **Kind**: global function  
-**Returns**: [<code>message</code>](#message) - Message with `success` status.  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | text | <code>string</code> | The message to show. |
+| [document] | <code>Document</code> | The document which the message will be shown in. Default is `context.document` |
 
-<a name="dialog"></a>
+<a name="alert"></a>
 
-## dialog(info, [accessory], [buttons], [message]) ⇒ <code>NSAlert</code>
-Shows a customizable modal dialog.
+## alert(info, [accessory], [buttons], [message], [type]) ⇒ <code>NSAlert</code>
+An alert with a combination of message, information text, buttons, and
+accessories.
 
 **Kind**: global function  
 **Returns**: <code>NSAlert</code> - Modal dialog window.  
@@ -181,13 +191,54 @@ Shows a customizable modal dialog.
 | Param | Type | Description |
 | --- | --- | --- |
 | info | <code>string</code> | The message to show in dialog. |
-| [accessory] | <code>object</code> | An AppKit view or control to place in dialog for     user inputs. |
-| [buttons] | <code>Array.&lt;string&gt;</code> | Buttons to display in dialog for user actions.     Default is `['OK']` |
-| [message] | <code>string</code> | Title of dialog message. Default is     `context.command.name()` |
+| [accessory] | <code>object</code> | An AppKit view or control to place in dialog for user inputs. |
+| [buttons] | <code>Array.&lt;string&gt;</code> | Buttons to display in dialog for user actions. Default is `['OK']` |
+| [message] | <code>string</code> | Title of dialog message. Default is `context.command.name()` |
+| [type] | <code>number</code> | Indicates the alert’s severity level. Default is `0` |
+
+<a name="showDialog"></a>
+
+## showDialog(alert) ⇒ <code>number</code>
+Runs the alert as an app-modal dialog.
+
+**Kind**: global function  
+**Returns**: <code>number</code> - The constant that identifies the button clicked.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| alert | <code>NSAlert</code> | A preset alert to run. |
+
+<a name="showSheet"></a>
+
+## showSheet(alert, [document]) ⇒ <code>number</code>
+Runs the alert modally as a sheet attached to the specified window.
+
+**Kind**: global function  
+**Returns**: <code>number</code> - The constant that identifies the button clicked.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| alert | <code>NSAlert</code> | A preset alert to run. |
+| [document] | <code>Document</code> | The document which to display the sheet on window. Default is `context.document` |
+
+<a name="inputLabel"></a>
+
+## inputLabel(text, [frame], [size], [bold]) ⇒ <code>NSTextField</code>
+Simple text label for input fields.
+
+**Kind**: global function  
+**Returns**: <code>NSTextField</code> - Uneditable text field to display.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| text | <code>string</code> | The label text to display. |
+| [frame] | <code>NSRect</code> | The rectangle of the text field, specified in points in the coordinate space of the enclosing view. Default is `NSMakeRect(0, 0, 240, 25)` |
+| [size] | <code>number</code> | The font size of the text. Default is `NSFont.systemFontSize()` |
+| [bold] | <code>boolean</code> | Specifies whether display the text bold. Default is `false` |
 
 <a name="textField"></a>
 
-## textField([initial]) ⇒ <code>NSTextField</code>
+## textField([initial], [frame]) ⇒ <code>NSTextField</code>
 Returns a text input accessory.
 
 **Kind**: global function  
@@ -196,10 +247,11 @@ Returns a text input accessory.
 | Param | Type | Description |
 | --- | --- | --- |
 | [initial] | <code>string</code> | Default input text. |
+| [frame] | <code>NSRect</code> | The rectangle of the control, specified in points in the coordinate space of the enclosing view. Default is `NSMakeRect(0, 0, 240, 25)` |
 
 <a name="comboBox"></a>
 
-## comboBox(items) ⇒ <code>NSComboBox</code>
+## comboBox(items, [frame]) ⇒ <code>NSComboBox</code>
 Returns an editable, autocomplete combo box accessory.
 
 **Kind**: global function  
@@ -208,10 +260,11 @@ Returns an editable, autocomplete combo box accessory.
 | Param | Type | Description |
 | --- | --- | --- |
 | items | <code>Array.&lt;string&gt;</code> | Options to be listed in combo box. |
+| [frame] | <code>NSRect</code> | The rectangle of the control, specified in points in the coordinate space of the enclosing view. Default is `NSMakeRect(0, 0, 240, 25)` |
 
 <a name="popUpButton"></a>
 
-## popUpButton(items) ⇒ <code>NSPopUpButton</code>
+## popUpButton(items, [frame]) ⇒ <code>NSPopUpButton</code>
 Returns a pop up button accessory.
 
 **Kind**: global function  
@@ -220,10 +273,11 @@ Returns a pop up button accessory.
 | Param | Type | Description |
 | --- | --- | --- |
 | items | <code>Array.&lt;string&gt;</code> | Options to be listed in pop up button. |
+| [frame] | <code>NSRect</code> | The rectangle of the control, specified in points in the coordinate space of the enclosing view. Default is `NSMakeRect(0, 0, 240, 25)` |
 
 <a name="slider"></a>
 
-## slider(options) ⇒ <code>NSSlider</code>
+## slider(options, [frame]) ⇒ <code>NSSlider</code>
 Returns a slider accessory with tick marks for given range.
 
 **Kind**: global function  
@@ -232,18 +286,19 @@ Returns a slider accessory with tick marks for given range.
 | Param | Type | Description |
 | --- | --- | --- |
 | options | <code>Object</code> | Properties of the slider. |
+| [frame] | <code>NSRect</code> | The rectangle of the control, specified in points in the coordinate space of the enclosing view. Default is `NSMakeRect(0, 0, 240, 25)` |
 
 **Properties**
 
 | Name | Type | Description |
 | --- | --- | --- |
-| [options.minValue] | <code>number</code> | Minimum selectable value of slider.     Default is `1` |
-| [options.maxValue] | <code>number</code> | Maximum selectable value of slider.     Default is `10` |
-| [options.initialValue] | <code>number</code> | Initial selected value of slider.     Default is `1` |
+| [options.minValue] | <code>number</code> | Minimum selectable value of slider. Default is `1` |
+| [options.maxValue] | <code>number</code> | Maximum selectable value of slider. Default is `10` |
+| [options.initialValue] | <code>number</code> | Initial selected value of slider. Default is `1` |
 
 <a name="scrollView"></a>
 
-## scrollView(view) ⇒ <code>NSView</code>
+## scrollView(documentView, [frame], [horizontal], [vertical]) ⇒ <code>NSView</code>
 Returns a vertically scrollable accessory with given view.
 
 **Kind**: global function  
@@ -251,11 +306,14 @@ Returns a vertically scrollable accessory with given view.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| view | <code>object</code> | Accessory to be placed in scroll view. |
+| documentView | <code>NSView</code> | The view the scroll view scrolls within its content view. |
+| [frame] | <code>NSRect</code> | The rectangle of the scroll view. Default is `NSMakeRect(0, 0, 320, 120)` |
+| [horizontal] | <code>boolean</code> | A Boolean that indicates whether the scroll view has a horizontal scroller. Default is `false` |
+| [vertical] | <code>boolean</code> | A Boolean that indicates whether the scroll view has a vertical scroller. Default is `true` |
 
 <a name="optionList"></a>
 
-## optionList(items) ⇒ [<code>CheckboxList</code>](#CheckboxList)
+## optionList(items, [width]) ⇒ [<code>CheckboxList</code>](#CheckboxList)
 Returns a checkbox list accessory of options.
 
 **Kind**: global function  
@@ -264,10 +322,11 @@ Returns a checkbox list accessory of options.
 | Param | Type | Description |
 | --- | --- | --- |
 | items | <code>Array.&lt;string&gt;</code> | Options to be listed with checkboxes. |
+| [width] | <code>number</code> | Width of the options. Default is `320` |
 
 <a name="textList"></a>
 
-## textList(items) ⇒ <code>NSView</code>
+## textList(items, [width]) ⇒ <code>NSView</code>
 Returns a text list accesory.
 
 **Kind**: global function  
@@ -276,6 +335,7 @@ Returns a text list accesory.
 | Param | Type | Description |
 | --- | --- | --- |
 | items | <code>Array.&lt;string&gt;</code> | Options to be listed in scroll view. |
+| [width] | <code>number</code> | Width of the list items. Default is `320` |
 
 <a name="CheckboxList"></a>
 
