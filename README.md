@@ -49,6 +49,16 @@ import { alert } from '@ozgurgunes/sketch-plugin-ui'
 alert('Click OK to close this dialog.').runModal()
 ```
 
+#### Show a Sheet
+
+ Attach alert as a sheet to given document.
+
+```javascript
+import { alert } from '@ozgurgunes/sketch-plugin-ui'
+
+alert('Click OK to close this dialog.').runSheet(context.document)
+```
+
 #### Get User Input
 
 An autocomplete combo box, which user can pick an option or type new one.
@@ -96,6 +106,7 @@ var options = ['An option', 'Another option']
 var list = optionList(options)
 var accessory = scrollView(list.view)
 var response = alert(info, buttons, accessory).runModal()
+
 if (response === 1002) {
   // User clicked to "Select All".
   // Get a confirmation before selecting all.
@@ -109,6 +120,7 @@ if (response === 1002) {
     successMessage('All ' + options.length + ' option selected.')
   }
 }
+
 if (response === 1000) {
   if (list.getSelection().length == 0) {
     // User clicked to "Select" button, without selecting any option.
@@ -119,15 +131,13 @@ if (response === 1000) {
 }
 ```
 
-
 ## Functions
 
 * [showMessage(text, [status], [document])](#showMessage)
 * [errorMessage(text, [document])](#errorMessage)
 * [successMessage(text, [document])](#successMessage)
 * [alert(info, [accessory], [buttons], [message], [type])](#alert) ⇒ <code>NSAlert</code>
-* [showDialog(alert)](#showDialog) ⇒ <code>number</code>
-* [showSheet(alert, [document])](#showSheet) ⇒ <code>number</code>
+    * [.runSheet([document])](#alert.runSheet)
 * [inputLabel(text, [frame], [size], [bold])](#inputLabel) ⇒ <code>NSTextField</code>
 * [textField([initial], [frame])](#textField) ⇒ <code>NSTextField</code>
 * [comboBox(items, [frame])](#comboBox) ⇒ <code>NSComboBox</code>
@@ -186,7 +196,7 @@ An alert with a combination of message, information text, buttons, and
 accessories.
 
 **Kind**: global function  
-**Returns**: <code>NSAlert</code> - Modal dialog window.  
+**Returns**: <code>NSAlert</code> - A preset `NSAlert` with a `runSheet` method attached.  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -196,29 +206,15 @@ accessories.
 | [message] | <code>string</code> | Title of dialog message. Default is `context.command.name()` |
 | [type] | <code>number</code> | Indicates the alert’s severity level. Default is `0` |
 
-<a name="showDialog"></a>
+<a name="alert.runSheet"></a>
 
-## showDialog(alert) ⇒ <code>number</code>
-Runs the alert as an app-modal dialog.
-
-**Kind**: global function  
-**Returns**: <code>number</code> - The constant that identifies the button clicked.  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| alert | <code>NSAlert</code> | A preset alert to run. |
-
-<a name="showSheet"></a>
-
-## showSheet(alert, [document]) ⇒ <code>number</code>
+### alert.runSheet([document])
 Runs the alert modally as a sheet attached to the specified window.
 
-**Kind**: global function  
-**Returns**: <code>number</code> - The constant that identifies the button clicked.  
+**Kind**: static method of [<code>alert</code>](#alert)  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| alert | <code>NSAlert</code> | A preset alert to run. |
 | [document] | <code>Document</code> | The document which to display the sheet on window. Default is `context.document` |
 
 <a name="inputLabel"></a>
@@ -232,7 +228,7 @@ Simple text label for input fields.
 | Param | Type | Description |
 | --- | --- | --- |
 | text | <code>string</code> | The label text to display. |
-| [frame] | <code>NSRect</code> | The rectangle of the text field, specified in points in the coordinate space of the enclosing view. Default is `NSMakeRect(0, 0, 240, 25)` |
+| [frame] | <code>NSRect</code> | The rectangle of the text field, specified in points in the coordinate space of the enclosing view. Default is `NSMakeRect(0, 0, 240, 18)` |
 | [size] | <code>number</code> | The font size of the text. Default is `NSFont.systemFontSize()` |
 | [bold] | <code>boolean</code> | Specifies whether display the text bold. Default is `false` |
 

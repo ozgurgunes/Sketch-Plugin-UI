@@ -55,7 +55,7 @@ export function successMessage(text, document = context.document) {
  * @param {string} [message] Title of dialog message. Default is
  *     `context.command.name()`
  * @param {number} [type] Indicates the alert’s severity level. Default is `0`
- * @returns {NSAlert} Modal dialog window.
+ * @returns {NSAlert} A preset `NSAlert` with a `runSheet` method attached.
  */
 export function alert(info, buttons, accessory, message, type = 0) {
   buttons = buttons || ['OK']
@@ -72,40 +72,26 @@ export function alert(info, buttons, accessory, message, type = 0) {
     alert.setAccessoryView(accessory)
     alert.window().setInitialFirstResponder(accessory)
   }
+  /**
+   * Runs the alert modally as a sheet attached to the specified window.
+   *
+   * @memberof alert
+   * @param {Document} [document] The document which to display the sheet on
+   *     window. Default is `context.document`
+   */
+  alert.runSheet = function(document = context.document) {
+    let window = (document.sketchObject || document).documentWindow()
+    alert.beginSheetModalForWindow_completionHandler(
+      window,
+      __mocha__.createBlock_function('v16@?0q8', function onCompletion(
+        _returnCode
+      ) {
+        NSApp.stopModalWithCode(_returnCode)
+      })
+    )
+    return NSApp.runModalForWindow(window)
+  }
   return alert
-}
-
-/**
- * Runs the alert as an app-modal dialog.
- *
- * @param {NSAlert} alert A preset alert to run.
- * @returns {number} The constant that identifies the button clicked.
- */
-export function showDialog(alert) {
-  return alert.runModal()
-}
-
-/**
- * Runs the alert modally as a sheet attached to the specified window.
- *
- * @param {NSAlert} alert A preset alert to run.
- * @param {Document} [document] The document which to display the sheet on
- *     window. Default is `context.document`
- * @returns {number} The constant that identifies the button clicked.
- */
-export function showSheet(alert, document = context.document) {
-  let window = (document.sketchObject || document).documentWindow()
-  alert.beginSheetModalForWindow_completionHandler(
-    window,
-    __mocha__.createBlock_function('v16@?0q8', function onCompletion(
-      _returnCode
-    ) {
-      NSApp.stopModalWithCode(_returnCode)
-    })
-  )
-  let response = NSApp.runModalForWindow(window)
-  NSApp.endSheet(alert)
-  return response
 }
 
 /**
@@ -114,7 +100,7 @@ export function showSheet(alert, document = context.document) {
  * @param {string} text The label text to display.
  * @param {NSRect} [frame] The rectangle of the text field, specified in
  *     points in the coordinate space of the enclosing view. Default is
- *     `NSMakeRect(0, 0, 240, 25)`
+ *     `NSMakeRect(0, 0, 240, 18)`
  * @param {number} [size] The font size of the text. Default is
  *     `NSFont.systemFontSize()`
  * @param {boolean} [bold] Specifies whether display the text bold. Default is
@@ -147,7 +133,7 @@ export function inputLabel(text, frame, size, bold = false) {
  * @returns {NSTextField} Text input with initial value.
  */
 export function textField(initial = '', frame) {
-  frame = frame || NSMakeRect(0, 0, 240, 18)
+  frame = frame || NSMakeRect(0, 0, 240, 25)
   let accessory = NSTextField.alloc().initWithFrame(frame)
   accessory.setStringValue(initial)
   return accessory
