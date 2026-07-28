@@ -1,3 +1,8 @@
+> [!WARNING]
+> **Unmaintained Project:** This project is no longer actively maintained or supported. 
+> All issues, pull requests, and feature requests will be ignored. 
+> Feel free to fork the repository, but use it at your own risk.
+
 # Sketch Plugin UI
 
 Simple UI functions for Sketch plugins. Provides preset status messages and dialog windows with accessories and scroll views.
